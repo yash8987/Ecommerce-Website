@@ -54,7 +54,7 @@ def create_order(order_data: OrderCreate, db: Session = Depends(get_db), current
 def my_orders(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     return db.query(Order).filter(Order.user_id == current_user.id).all()
 
-@router.delete("/{order_id}")
+@router.delete("/deleteOrder/{order_id}")
 def delete_own_order(
     order_id: int,
     db: Session = Depends(get_db),
@@ -73,3 +73,25 @@ def delete_own_order(
     db.delete(order)
     db.commit()
     return {"message": f"Order #{order_id} deleted successfully"}
+
+@router.patch("/cancelOrder/{order_id}")
+def cancel_order(
+    order_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    order = db.query(Order).filter(Order.id == order_id, Order.user_id == current_user.id).first()
+
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found.")
+    if order.status != "pending":
+        raise HTTPException(status_code=400, detail="Only pending orders can be cancelled.")
+
+    for item in order.items:
+        product = db.query(Product).filter(Product.id == item.product_id).first()
+        if product:
+            product.stock += item.quantity
+
+    order.status = "cancelled"
+    db.commit()
+    return {"detail": f"Order {order.id} cancelled successfully."}
