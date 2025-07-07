@@ -26,3 +26,7 @@ class ProductUpdate(BaseModel):
     is_active: Optional[bool] = None
     is_premium: Optional[bool] = None
     category : Optional[str] = None
+
+class ProductInOrder(BaseModel):
+    name: str
+    description: str
