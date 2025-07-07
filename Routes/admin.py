@@ -65,6 +65,10 @@ def complete_order(order_id: int, db: Session = Depends(get_db), _: User = Depen
     order = db.query(Order).filter(Order.id == order_id).first()
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
+     if order.status == "cancelled":
+        raise HTTPException(status_code=404, detail="Order is cancelled by the customer.")
+    if order.status == "completed":
+        raise HTTPException(status_code=404, detail="Order is already completed.")
 
     order.status = "completed"
     db.commit()
