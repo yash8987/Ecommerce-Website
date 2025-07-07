@@ -33,3 +33,9 @@ class UpdatePremiumStatus(BaseModel):
 class UpdateAdminStatus(BaseModel):
     is_admin: bool
 
+class UserInOrder(BaseModel):
+    id: int
+    name: str
+    is_admin: bool
+    is_premium: bool
+
